@@ -1,0 +1,16 @@
+{
+  "_note": "Sample contractors for demo purposes only. Names, phone numbers, and license numbers are fictional.",
+  "pros": [
+    {"id": "pro-101", "name": "Tidewater Plumbing", "trade": "plumbing", "cities": ["lincoln city", "depoe bay", "otis"], "rating": 4.9, "reviews": 212, "licensed": true, "license_no": "OR-CCB-SAMPLE-1101", "emergency_24_7": true, "hours": [7, 19]},
+    {"id": "pro-102", "name": "Siletz Bay Pipe & Drain", "trade": "plumbing", "cities": ["lincoln city", "gleneden beach"], "rating": 4.6, "reviews": 88, "licensed": true, "license_no": "OR-CCB-SAMPLE-1102", "emergency_24_7": false, "hours": [8, 17]},
+    {"id": "pro-103", "name": "Yaquina Plumbing Co.", "trade": "plumbing", "cities": ["newport", "depoe bay", "waldport"], "rating": 4.7, "reviews": 140, "licensed": true, "license_no": "OR-CCB-SAMPLE-1103", "emergency_24_7": true, "hours": [7, 18]},
+    {"id": "pro-201", "name": "Headland Electric", "trade": "electrical", "cities": ["lincoln city", "depoe bay", "newport"], "rating": 4.8, "reviews": 176, "licensed": true, "license_no": "OR-CCB-SAMPLE-2201", "emergency_24_7": true, "hours": [7, 18]},
+    {"id": "pro-202", "name": "Coastline Wiring", "trade": "electrical", "cities": ["newport", "waldport"], "rating": 4.4, "reviews": 51, "licensed": true, "license_no": "OR-CCB-SAMPLE-2202", "emergency_24_7": false, "hours": [8, 16]},
+    {"id": "pro-301", "name": "Cascade Head Roofing", "trade": "roofing", "cities": ["lincoln city", "otis", "neskowin"], "rating": 4.7, "reviews": 97, "licensed": true, "license_no": "OR-CCB-SAMPLE-3301", "emergency_24_7": true, "hours": [7, 17]},
+    {"id": "pro-302", "name": "Storm Shield Roofing", "trade": "roofing", "cities": ["newport", "depoe bay", "lincoln city"], "rating": 4.5, "reviews": 63, "licensed": true, "license_no": "OR-CCB-SAMPLE-3302", "emergency_24_7": false, "hours": [8, 17]},
+    {"id": "pro-401", "name": "Salt Air HVAC", "trade": "hvac", "cities": ["lincoln city", "depoe bay", "gleneden beach"], "rating": 4.8, "reviews": 120, "licensed": true, "license_no": "OR-CCB-SAMPLE-4401", "emergency_24_7": true, "hours": [7, 19]},
+    {"id": "pro-402", "name": "Devil's Lake Heating & Air", "trade": "hvac", "cities": ["lincoln city", "otis"], "rating": 4.3, "reviews": 34, "licensed": true, "license_no": "OR-CCB-SAMPLE-4402", "emergency_24_7": false, "hours": [8, 17]},
+    {"id": "pro-501", "name": "Driftwood Handyman Services", "trade": "handyman", "cities": ["lincoln city", "depoe bay", "newport", "gleneden beach"], "rating": 4.6, "reviews": 205, "licensed": true, "license_no": "OR-CCB-SAMPLE-5501", "emergency_24_7": false, "hours": [8, 18]},
+    {"id": "pro-502", "name": "Unverified Quick Fix", "trade": "plumbing", "cities": ["lincoln city"], "rating": 3.9, "reviews": 12, "licensed": false, "license_no": null, "emergency_24_7": true, "hours": [0, 24]}
+  ]
+}
