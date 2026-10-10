@@ -1,0 +1,18 @@
+# One-click deploy on Render (free plan). See README "Deploy to Render".
+services:
+  - type: web
+    name: localpro-enclave
+    runtime: python
+    plan: free
+    buildCommand: pip install .
+    startCommand: python -m localpro.server
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: HOST
+        value: 0.0.0.0
+      - key: LOCALPRO_SIGNING_KEY
+        generateValue: true
+      - key: LOCALPRO_DB
+        value: /tmp/localpro.db

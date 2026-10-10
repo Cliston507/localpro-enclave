@@ -123,6 +123,17 @@ export LOCALPRO_ALLOWED_HOSTS=<your-subdomain>.trycloudflare.com
 python -m localpro.server
 ```
 
+### Deploy to Render (free)
+
+The repo includes a `render.yaml` blueprint, so the server and the simulator page go online together.
+
+1. Sign in at [render.com](https://render.com) with GitHub.
+2. Choose **New**, then **Blueprint**, and pick this repository.
+3. Click **Apply**. Render installs the package, generates a signing key, and starts the server.
+4. Open the `onrender.com` address Render shows. The simulator page loads at `/`, and the MCP endpoint is at `/mcp`.
+
+On the free plan the service sleeps after 15 minutes without traffic and takes about a minute to wake up. The database resets whenever it restarts, which is fine for a demo ([Render docs](https://render.com/docs/free)). Open the page once before a demo or judging session to wake it.
+
 ## Project layout
 
 ```
