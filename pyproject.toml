@@ -21,7 +21,7 @@ localpro-enclave = "localpro.server:main"
 packages = ["localpro"]
 
 [tool.setuptools.package-data]
-localpro = ["data/*.json"]
+localpro = ["data/*.json", "web/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

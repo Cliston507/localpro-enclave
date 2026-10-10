@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LocalPro Enclave · Alexa+ Simulator</title>
+  <meta name="description" content="A simulated Alexa+ conversation that calls the LocalPro Enclave MCP server live over Streamable HTTP.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="LocalPro Enclave home">
+      <svg class="brand-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M16 4.5 26 8.6v7.3c0 5.8-4.1 9.8-10 11.6-5.9-1.8-10-5.8-10-11.6V8.6L16 4.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M11.5 12.5v7.5h9" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand-text">LocalPro <strong>Enclave</strong></span>
+    </a>
+    <span class="sim-badge">Simulated Alexa+ experience</span>
+    <div class="status" id="status" role="status" aria-live="polite">
+      <span class="dot" data-state="connecting"></span>
+      <span id="status-text">Connecting to MCP server…</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- Conversation -->
+    <section class="panel convo" aria-labelledby="convo-title">
+      <div class="panel-head">
+        <h2 id="convo-title">Conversation</h2>
+        <div class="head-actions">
+          <button class="ghost" id="voice-toggle" aria-pressed="true" title="Read Alexa replies aloud">Voice on</button>
+          <button class="ghost" id="reset">Start over</button>
+        </div>
+      </div>
+
+      <div class="device" aria-hidden="true">
+        <div class="ring" id="ring" data-state="idle"></div>
+      </div>
+
+      <ol class="transcript" id="transcript" aria-live="polite"></ol>
+
+      <div class="chips" id="chips" aria-label="Suggested requests">
+        <button class="chip" data-say="Alexa, my water heater is leaking. I need a plumber today in Lincoln City.">Water heater leak</button>
+        <button class="chip" data-say="An outlet is sparking in my kitchen in Newport, I need an electrician now.">Sparking outlet</button>
+        <button class="chip" data-say="I'd like someone to look at a roof leak in Lincoln City this week.">Roof check</button>
+      </div>
+
+      <form class="composer" id="composer" autocomplete="off">
+        <label class="sr-only" for="say">Say something to Alexa</label>
+        <input id="say" name="say" type="text" placeholder="Say something to Alexa…" required>
+        <button type="button" class="icon-btn" id="mic" title="Speak (Chrome only)" aria-label="Speak">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <button type="submit" class="primary">Send</button>
+      </form>
+    </section>
+
+    <div class="side">
+      <!-- Technician check-in -->
+      <section class="panel tech" aria-labelledby="tech-title">
+        <div class="panel-head">
+          <h2 id="tech-title">Technician check-in</h2>
+          <span class="muted small" id="wo-label">No work order yet</span>
+        </div>
+        <div id="tech-empty" class="empty">
+          <p>Book a job in the conversation. The signed work order appears here, and you can test it the way a technician's app would.</p>
+        </div>
+        <div id="tech-body" hidden>
+          <dl class="wo">
+            <div><dt>Work order</dt><dd id="wo-id">—</dd></div>
+            <div><dt>Contractor</dt><dd id="wo-pro">—</dd></div>
+            <div><dt>Arrival</dt><dd id="wo-window">—</dd></div>
+            <div class="wide"><dt>Signed token</dt><dd class="mono token" id="wo-token">—</dd></div>
+          </dl>
+          <div class="tests">
+            <button class="test" data-test="checkin"><span class="t-name">Booked pro checks in</span><span class="t-desc">Correct contractor, real token</span></button>
+            <button class="test" data-test="wrong"><span class="t-name">Wrong contractor</span><span class="t-desc">Another pro presents the token</span></button>
+            <button class="test" data-test="tamper"><span class="t-name">Tampered token</span><span class="t-desc">One character changed</span></button>
+            <button class="test" data-test="reuse"><span class="t-name">Reuse after check-in</span><span class="t-desc">Same token, second time</span></button>
+          </div>
+          <ol class="verdicts" id="verdicts" aria-live="polite"></ol>
+        </div>
+      </section>
+
+      <!-- MCP inspector -->
+      <section class="panel inspector" aria-labelledby="insp-title">
+        <div class="panel-head">
+          <h2 id="insp-title">Live MCP traffic</h2>
+          <span class="muted small mono" id="endpoint">—</span>
+        </div>
+        <ol class="log" id="log"></ol>
+      </section>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <p>Every reply comes from real MCP tool calls (JSON-RPC 2.0 over Streamable HTTP, protocol 2025-11-25). The dialogue is scripted in the browser; contractor data is fictional. <a href="https://github.com/Cliston507/localpro-enclave" target="_blank" rel="noopener">Source on GitHub</a></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

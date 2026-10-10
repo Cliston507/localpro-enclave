@@ -70,3 +70,16 @@ def test_handshake_and_full_flow(server_url):
             assert err.is_error and "license" in err.content[0].text
 
     anyio.run(run)
+
+
+def test_simulator_page_is_served(server_url):
+    import urllib.request
+
+    base = server_url.rsplit("/mcp", 1)[0]
+    with urllib.request.urlopen(base + "/") as r:
+        html = r.read().decode()
+        assert r.status == 200 and "Alexa+" in html and "app.js" in html
+    with urllib.request.urlopen(base + "/app.js") as r:
+        assert "tools/call" in r.read().decode()
+    with urllib.request.urlopen(base + "/health") as r:
+        assert b'"ok"' in r.read()

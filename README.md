@@ -8,6 +8,7 @@ Built for the [Build, Ship, Shape: Amazon Developer Hackathon](https://amazonapp
 - **SDK:** official [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk) (`mcp==2.3.0`)
 - **Entry point:** `localpro/server.py`, run with `python -m localpro.server`
 - **Latency:** every tool call takes under 50 ms locally (Alexa+ requires under 500 ms)
+- **Demo:** a browser-based Alexa+ simulator at `/` that acts as a real MCP client
 
 ## The problem
 
@@ -53,6 +54,18 @@ export LOCALPRO_SIGNING_KEY="$(python -c 'import secrets; print(secrets.token_ur
 python -m localpro.server          # serves http://127.0.0.1:8000/mcp
 ```
 
+Open **http://127.0.0.1:8000/** for the Alexa+ simulator, served by the same process.
+
+### Alexa+ simulator
+
+Entrants can't connect a self-hosted MCP server to a real Alexa+ device, so this repo follows the hackathon's simulated-experience path. The page in `localpro/web/` is a real MCP client: it sends `initialize`, `tools/list`, and `tools/call` as JSON-RPC 2.0 over Streamable HTTP to `/mcp`, and handles session IDs and event-stream responses.
+
+- **Conversation:** type, tap a suggestion, or use the mic (Chrome). Replies are read aloud with the browser's speech engine. A small scripted dialogue manager stands in for Alexa+'s language model, and every fact it says comes from a tool result.
+- **Technician check-in:** after booking, test the signed work order four ways: the booked pro checks in, a wrong contractor, a tampered token, and reuse after check-in.
+- **Live MCP traffic:** every JSON-RPC request and response, with round-trip time.
+
+### Scripted terminal demo
+
 In a second terminal, run the scripted demo. It plays the part of Alexa+ and calls every tool over Streamable HTTP:
 
 ```bash
@@ -80,7 +93,7 @@ curl -s -X POST http://127.0.0.1:8000/mcp \
 pytest -q
 ```
 
-There are 15 tests. Fourteen cover the dispatch logic: licensing filter, pricing, after-hours rules, double-booking, quote expiry and reuse, and token tampering, expiry, wrong contractor, and reuse. One end-to-end test starts the real server, negotiates protocol 2025-11-25 over HTTP, and runs the full flow.
+There are 16 tests. Fourteen cover the dispatch logic: licensing filter, pricing, after-hours rules, double-booking, quote expiry and reuse, and token tampering, expiry, wrong contractor, and reuse. Two end-to-end tests start the real server: one negotiates protocol 2025-11-25 over HTTP and runs the full flow, and one checks that the simulator page is served.
 
 ## Security model
 
@@ -100,6 +113,7 @@ There are 15 tests. Fourteen cover the dispatch logic: licensing filter, pricing
 | `LOCALPRO_PROS` | bundled sample data | Path to a custom contractor JSON file |
 | `HOST` / `PORT` | `127.0.0.1` / `8000` | Bind address |
 | `LOCALPRO_ALLOWED_HOSTS` | none | Comma-separated public hostnames, for example a cloudflared tunnel |
+| `LOCALPRO_CORS_ORIGINS` | none | Only if the simulator is hosted on a different origin than the server |
 
 ### Exposing a public URL for testing
 
@@ -113,10 +127,11 @@ python -m localpro.server
 
 ```
 localpro/
-  server.py       MCP server: tool definitions and Streamable HTTP entry point
+  server.py       MCP server: tool definitions, Streamable HTTP entry point, simulator routes
   dispatch.py     Core logic: matching, availability, pricing, booking, verification
   tokens.py       HMAC-SHA256 work-order tokens
   data/pros.json  Sample contractors (fictional) on the Oregon coast
+  web/            Alexa+ simulator: index.html, app.js (MCP client + dialogue), app.css
 scripts/demo.py   Scripted Alexa+ conversation over Streamable HTTP
 tests/            Unit tests and an end-to-end HTTP test
 ```
@@ -127,7 +142,6 @@ All contractors, license numbers, and prices are fictional and for demonstration
 
 ## What's next
 
-- Web simulator: a browser Alexa+ conversation that calls this server live
 - Echo Show cards with a live map and the technician's arrival time
 - Real contractor onboarding with license and insurance checks
 - Voice confirmation for high-value jobs before payment

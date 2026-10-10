@@ -354,7 +354,8 @@ class Dispatcher:
             if row["status"] == "cancelled":
                 return fail("Work order was cancelled.")
             if row["status"] == "checked_in" and check_in:
-                return fail(f"Work order was already checked in at {row['checked_in_at']}. Tokens are single-use.")
+                when = datetime.fromisoformat(row["checked_in_at"]).strftime("%I:%M %p").lstrip("0")
+                return fail(f"Work order was already checked in at {when}. Tokens are single-use.")
             checked_in = False
             if check_in and row["status"] == "booked":
                 self._db.execute(

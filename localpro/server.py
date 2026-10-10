@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 import os
 import secrets
+from pathlib import Path
 from typing import Annotated, Any, Literal
 
 from mcp.server.mcpserver import MCPServer
@@ -18,11 +19,21 @@ from mcp.server.mcpserver.exceptions import ToolError
 from mcp.server.transport_security import TransportSecuritySettings
 from mcp_types import ToolAnnotations
 from pydantic import Field
+from starlette.requests import Request
+from starlette.responses import FileResponse, JSONResponse, Response
 
 from .dispatch import Dispatcher, DispatchError
 from .tokens import Signer
 
 log = logging.getLogger("localpro")
+
+WEB_DIR = Path(__file__).resolve().parent / "web"
+WEB_FILES = {
+    "/": ("index.html", "text/html; charset=utf-8"),
+    "/app.js": ("app.js", "text/javascript; charset=utf-8"),
+    "/app.css": ("app.css", "text/css; charset=utf-8"),
+    "/favicon.svg": ("favicon.svg", "image/svg+xml"),
+}
 
 INSTRUCTIONS = """\
 LocalPro Enclave is a home-services dispatcher for the Oregon coast.
@@ -126,6 +137,22 @@ def create_server(dispatcher: Dispatcher | None = None) -> MCPServer:
         """
         return run(d.verify_work_order, authorization_token, pro_id, check_in)
 
+    # Alexa+ simulator web page (an MCP client in the browser), served alongside /mcp.
+    for route_path, (filename, media_type) in WEB_FILES.items():
+        def make_handler(fname: str = filename, mtype: str = media_type):
+            async def handler(request: Request) -> Response:
+                path = WEB_DIR / fname
+                if not path.is_file():
+                    return Response("Simulator files not found.", status_code=404)
+                return FileResponse(path, media_type=mtype, headers={"Cache-Control": "no-cache"})
+            return handler
+
+        mcp.custom_route(route_path, methods=["GET"])(make_handler())
+
+    @mcp.custom_route("/health", methods=["GET"])
+    async def health(request: Request) -> Response:
+        return JSONResponse({"status": "ok", "tools": 4})
+
     return mcp
 
 
@@ -142,9 +169,20 @@ def main() -> None:
             allowed_hosts=allowed + [f"127.0.0.1:{port}", f"localhost:{port}"],
             allowed_origins=[f"https://{h}" for h in allowed],
         )
-    create_server().run(
-        transport="streamable-http", host=host, port=port, streamable_http_path="/mcp", transport_security=security,
-    )
+    import uvicorn
+
+    app = create_server().streamable_http_app(streamable_http_path="/mcp", transport_security=security, host=host)
+    cors = [o.strip() for o in os.environ.get("LOCALPRO_CORS_ORIGINS", "").split(",") if o.strip()]
+    if cors:
+        # Only for hosting the simulator on a different origin than the server.
+        from starlette.middleware.cors import CORSMiddleware
+
+        app.add_middleware(
+            CORSMiddleware, allow_origins=cors, allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+            allow_headers=["*"], expose_headers=["Mcp-Session-Id"],
+        )
+    log.info("Simulator: http://%s:%d/   MCP endpoint: http://%s:%d/mcp", host, port, host, port)
+    uvicorn.run(app, host=host, port=port, log_level="info")
 
 
 if __name__ == "__main__":
